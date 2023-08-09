@@ -6,6 +6,7 @@ from user.models import User
 
 # Create your models here.
 
+
 class Label(models.Model):
     guid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
