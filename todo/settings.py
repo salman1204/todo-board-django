@@ -43,7 +43,7 @@ DJANGO_DEFAULT_APPS = [
 
 THIRD_PARTY_APPS = ["rest_framework", "djoser"]
 
-PROJECT_APPS = ["user", "label"]
+PROJECT_APPS = ["user", "label", "ticket"]
 
 INSTALLED_APPS = DJANGO_DEFAULT_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
