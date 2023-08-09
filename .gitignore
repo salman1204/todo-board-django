@@ -39,3 +39,7 @@ MANIFEST
 .idea
 # Installer
 
+**/migrations/
+*.sqlite3
+/.vscode/settings.json
+.vscode
