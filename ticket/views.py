@@ -4,6 +4,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from label.models import Label
+from ticket.models import Ticket
 from ticket.serializers import TicketSerializer
 
 # Create your views here.
@@ -12,6 +13,33 @@ from ticket.serializers import TicketSerializer
 class TicketApiView(GenericAPIView):
     serializer_class = TicketSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        try:
+            label_guid = request.query_params.get('label')
+
+            ticket_by_labels = Ticket.objects.filter(
+                user=request.user, label__guid=label_guid).all()
+
+            serializer = self.serializer_class(ticket_by_labels, many=True)
+
+            return Response(
+                {
+                    "data": serializer.data,
+                    "response_message": "success",
+                    "response_code": status.HTTP_200_OK,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "data": {},
+                    "response_message": e.args[0],
+                    "response_code": status.HTTP_400_BAD_REQUEST,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
     def post(self, request):
         payload = request.data
