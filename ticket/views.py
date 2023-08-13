@@ -1,3 +1,4 @@
+import rest_framework
 from django.shortcuts import render
 from rest_framework import permissions, status
 from rest_framework.generics import GenericAPIView
@@ -53,5 +54,33 @@ class TicketApiView(GenericAPIView):
         if serializer.is_valid():
             serializer.save(user=request.user, label=label_instance)
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TicketDetailsApiView(GenericAPIView):
+    serializer_class = TicketSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, ticket_guid):
+        payload = request.data
+
+        ticket_instance = Ticket.objects.filter(
+            user=request.user, guid=ticket_guid).last()
+
+        if not ticket_instance:
+            return Response(data={"detail": "Ticket not found"}, status=status.HTTP_404_NOT_FOUND)
+        
+        label_guid = payload.get("label")
+        label_instance = Label.objects.filter(user=request.user, guid=label_guid).last()
+
+        if not label_instance:
+            return Response(data={"detail": "Label not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(ticket_instance, data=payload, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
