@@ -68,7 +68,6 @@ class TicketDetailsApiView(GenericAPIView):
         ticket_instance = Ticket.objects.filter(
             user=request.user, guid=ticket_guid).last()
 
-        print(ticket_instance)
         if not ticket_instance:
             return Response(data={"detail": "Ticket not found"}, status=status.HTTP_404_NOT_FOUND)
 

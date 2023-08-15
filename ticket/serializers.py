@@ -17,13 +17,19 @@ class TicketSerializer(serializers.Serializer):
         return Ticket.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
+
         instance.title = validated_data.get("title", instance.title)
         instance.description = validated_data.get("description", instance.description)
         instance.expiry_date = validated_data.get("expiry_date", instance.expiry_date)
 
-        label_guid = validated_data.get("label")["guid"]["hex"]
-        label_instance = Label.objects.filter(guid=label_guid).last()
-        instance.label = label_instance
+        if "label" in validated_data:
+            label_guid = validated_data.pop("label")["guid"]["hex"]
+
+            instance.label = Label.objects.get(guid=label_guid)
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+
+            instance.save()
 
         instance.save()
         return instance
