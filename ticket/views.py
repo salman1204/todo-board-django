@@ -62,20 +62,15 @@ class TicketDetailsApiView(GenericAPIView):
     serializer_class = TicketSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def patch(self, request, ticket_guid):
+    def put(self, request, ticket_guid):
         payload = request.data
 
         ticket_instance = Ticket.objects.filter(
             user=request.user, guid=ticket_guid).last()
 
+        print(ticket_instance)
         if not ticket_instance:
             return Response(data={"detail": "Ticket not found"}, status=status.HTTP_404_NOT_FOUND)
-        
-        label_guid = payload.get("label")
-        label_instance = Label.objects.filter(user=request.user, guid=label_guid).last()
-
-        if not label_instance:
-            return Response(data={"detail": "Label not found"}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.serializer_class(ticket_instance, data=payload, partial=True)
 
