@@ -11,7 +11,8 @@ class TicketSerializer(serializers.Serializer):
     label_title = serializers.CharField(required=False, source="label.title")
     title = serializers.CharField(required=True, max_length=120)
     description = serializers.CharField(required=False, max_length=240)
-    expiry_date = serializers.DateField(required=False, allow_null=True)
+    expiry_date = serializers.DateField(
+        required=False, allow_null=True, format="%d-%m-%Y", input_formats=["%d-%m-%Y"])
 
     def create(self, validated_data):
         return Ticket.objects.create(**validated_data)
