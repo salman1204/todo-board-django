@@ -1,5 +1,8 @@
+from datetime import datetime
+
 import rest_framework
 from django.shortcuts import render
+from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
@@ -17,10 +20,11 @@ class TicketApiView(GenericAPIView):
 
     def get(self, request):
         try:
-            label_guid = request.query_params.get('label')
+            label_guid = request.query_params.get("label")
 
             ticket_by_labels = Ticket.objects.filter(
-                user=request.user, label__guid=label_guid).all()
+                user=request.user, label__guid=label_guid
+            ).all()
 
             serializer = self.serializer_class(ticket_by_labels, many=True)
 
@@ -66,10 +70,13 @@ class TicketDetailsApiView(GenericAPIView):
         payload = request.data
 
         ticket_instance = Ticket.objects.filter(
-            user=request.user, guid=ticket_guid).last()
+            user=request.user, guid=ticket_guid
+        ).last()
 
         if not ticket_instance:
-            return Response(data={"detail": "Ticket not found"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                data={"detail": "Ticket not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
         serializer = self.serializer_class(ticket_instance, data=payload, partial=True)
 
@@ -78,3 +85,24 @@ class TicketDetailsApiView(GenericAPIView):
             return Response(data=serializer.data)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TicketExpireToday(GenericAPIView):
+    serializer_class = TicketSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        current_date = timezone.localtime(timezone.now()).date()
+        ticket_instances = Ticket.objects.filter(
+            user=request.user, expiry_date=current_date
+        )
+
+        serializer = self.serializer_class(ticket_instances, many=True)
+
+        response_data = {
+            "data": serializer.data,
+            "response_message": "success",
+            "response_code": status.HTTP_200_OK,
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
