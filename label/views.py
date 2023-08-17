@@ -53,6 +53,26 @@ class LabelDetailsApiView(GenericAPIView):
     serializer_class = LabelSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def put(self, request, label_guid):
+        payload = request.data
+
+        label_instance = Label.objects.filter(
+            user=request.user, guid=label_guid
+        ).last()
+
+        if not label_instance:
+            return Response(
+                data={"detail": "Label not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        serializer = self.serializer_class(label_instance, data=payload, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(data=serializer.data)
+
+        return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, label_guid):
         label_instance = Label.objects.filter(
             user=request.user, guid=label_guid
