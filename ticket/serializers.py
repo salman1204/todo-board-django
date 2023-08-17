@@ -66,7 +66,7 @@ class TicketHistorySerializer(serializers.Serializer):
     ticket_title = serializers.CharField(required=False, source="ticket.title")
     is_create = serializers.BooleanField(required=False)
     time = serializers.DateTimeField(
-        required=False, allow_null=True, format="%d-%m-%Y %H:%M:%S", input_formats=["%d-%m-%Y %H:%M:%S"]
+        required=False, allow_null=True, format="%d-%m-%Y %H:%M", input_formats=["%d-%m-%Y %H:%M:%S"]
     )
 
     def create(self, validated_data):
