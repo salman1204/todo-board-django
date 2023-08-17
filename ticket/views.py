@@ -86,6 +86,26 @@ class TicketDetailsApiView(GenericAPIView):
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, ticket_guid):
+        ticket_instance = Ticket.objects.filter(
+            user=request.user, guid=ticket_guid
+        ).last()
+
+        if not ticket_instance:
+            return Response(
+                data={"detail": "Ticket not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        ticket_instance.delete()
+
+        return Response(
+            {
+                "data": {},
+                "response_message": "Ticket have been deleted successfully.",
+                "response_code": status.HTTP_200_OK,
+            },
+            status=status.HTTP_200_OK,)
+
 
 class TicketExpireToday(GenericAPIView):
     serializer_class = TicketSerializer

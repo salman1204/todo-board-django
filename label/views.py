@@ -47,3 +47,28 @@ class LabelApiView(GenericAPIView):
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LabelDetailsApiView(GenericAPIView):
+    serializer_class = LabelSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, label_guid):
+        label_instance = Label.objects.filter(
+            user=request.user, guid=label_guid
+        ).last()
+
+        if not label_instance:
+            return Response(
+                data={"detail": "Label not found"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+        label_instance.delete()
+
+        return Response(
+            {
+                "data": {},
+                "response_message": "Label have been deleted successfully.",
+                "response_code": status.HTTP_200_OK,
+            },
+            status=status.HTTP_200_OK,)
