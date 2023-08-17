@@ -25,6 +25,7 @@ class TicketHistory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     label = models.ForeignKey(Label, on_delete=models.CASCADE)
     ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
+    is_create = models.BooleanField()
     time = models.DateTimeField()
 
     def __str__(self):

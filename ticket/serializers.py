@@ -18,7 +18,21 @@ class TicketSerializer(serializers.Serializer):
     )
 
     def create(self, validated_data):
-        return Ticket.objects.create(**validated_data)
+        label_instance = validated_data.get("label")
+
+        ticket_instance = Ticket.objects.create(**validated_data)
+
+        # Create a data row in TicketHistory
+        TicketHistory.objects.create(
+            user=ticket_instance.user,
+            label=label_instance,
+            ticket=ticket_instance,
+            is_create=True,
+            time=datetime.datetime.now(),  # You might need to adjust this field accordingly
+        )
+
+        return ticket_instance
+        # return Ticket.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get("title", instance.title)
@@ -33,6 +47,7 @@ class TicketSerializer(serializers.Serializer):
                 user=instance.user,
                 label=instance.label,
                 ticket=instance,
+                is_create=False,
                 time=datetime.datetime.now()  # You can customize the time value here
             )
 
@@ -49,6 +64,7 @@ class TicketHistorySerializer(serializers.Serializer):
     guid = serializers.UUIDField(read_only=True, source="guid.hex")
     label_title = serializers.CharField(required=False, source="label.title")
     ticket_title = serializers.CharField(required=False, source="ticket.title")
+    is_create = serializers.BooleanField(required=False)
     time = serializers.DateTimeField(
         required=False, allow_null=True, format="%d-%m-%Y %H:%M:%S", input_formats=["%d-%m-%Y %H:%M:%S"]
     )
