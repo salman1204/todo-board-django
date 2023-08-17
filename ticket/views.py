@@ -8,8 +8,8 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 
 from label.models import Label
-from ticket.models import Ticket
-from ticket.serializers import TicketSerializer
+from ticket.models import Ticket, TicketHistory
+from ticket.serializers import TicketHistorySerializer, TicketSerializer
 
 # Create your views here.
 
@@ -126,3 +126,33 @@ class TicketExpireToday(GenericAPIView):
         }
 
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class TicketTrackHistoryDetailsApiView(GenericAPIView):
+    serializer_class = TicketHistorySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, ticket_guid):
+        try:
+            ticket_instances = TicketHistory.objects.filter(
+                user=request.user, ticket__guid=ticket_guid).all().order_by('-time')
+
+            serializer = self.serializer_class(ticket_instances, many=True)
+
+            return Response(
+                {
+                    "data": serializer.data,
+                    "response_message": "success",
+                    "response_code": status.HTTP_200_OK,
+                },
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                {
+                    "data": {},
+                    "response_message": e.args[0],
+                    "response_code": status.HTTP_400_BAD_REQUEST,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )

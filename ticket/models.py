@@ -18,3 +18,14 @@ class Ticket(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class TicketHistory(models.Model):
+    guid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    label = models.ForeignKey(Label, on_delete=models.CASCADE)
+    ticket = models.ForeignKey(Ticket, on_delete=models.CASCADE)
+    time = models.DateTimeField()
+
+    def __str__(self):
+        return (self.ticket.title)
